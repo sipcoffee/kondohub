@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMIN
+  OWNER
+  TENANT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  REJECTED
+}
+
+enum UnitStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  UNDER_MAINTENANCE
+}
+
+enum DurationType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// ==================== AUTH MODELS (better-auth) ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  emailVerified Boolean   @default(false)
+  image         String?
+  phone         String?
+  role          Role      @default(TENANT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sessions Session[]
+  accounts Account[]
+
+  // Owner relations
+  units Unit[] @relation("OwnerUnits")
+
+  // Tenant relations
+  bookings Booking[] @relation("TenantBookings")
+  reviews  Review[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ==================== CORE MODELS ====================
+
+model Unit {
+  id      String @id @default(cuid())
+  ownerId String
+  owner   User   @relation("OwnerUnits", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Basic Info
+  name        String
+  slug        String  @unique
+  description String  @db.Text
+  address     String
+  city        String
+  province    String
+  zipCode     String?
+  latitude    Float?
+  longitude   Float?
+
+  // Unit Details
+  bedrooms     Int
+  bathrooms    Int
+  maxGuests    Int
+  squareMeters Float?
+  floor        Int?
+
+  // Pricing (nullable to allow flexible pricing)
+  dailyRate   Float?
+  weeklyRate  Float?
+  monthlyRate Float?
+
+  // Status
+  status UnitStatus @default(DRAFT)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  photos       UnitPhoto[]
+  amenities    UnitAmenity[]
+  bookings     Booking[]
+  reviews      Review[]
+  availability Availability[]
+
+  @@index([ownerId])
+  @@index([city])
+  @@index([status])
+}
+
+model UnitPhoto {
+  id        String   @id @default(cuid())
+  unitId    String
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  url       String
+  key       String // R2 object key
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([unitId])
+}
+
+model Amenity {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  icon     String?
+  category String? // e.g., "General", "Kitchen", "Safety", "Entertainment"
+
+  units UnitAmenity[]
+}
+
+model UnitAmenity {
+  unitId    String
+  amenityId String
+  unit      Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, amenityId])
+}
+
+model Availability {
+  id        String   @id @default(cuid())
+  unitId    String
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  available Boolean  @default(true)
+  price     Float? // Override price for specific date
+
+  @@unique([unitId, date])
+  @@index([unitId])
+  @@index([date])
+}
+
+model Booking {
+  id       String @id @default(cuid())
+  unitId   String
+  unit     Unit   @relation(fields: [unitId], references: [id])
+  tenantId String
+  tenant   User   @relation("TenantBookings", fields: [tenantId], references: [id])
+
+  // Booking Details
+  checkIn      DateTime
+  checkOut     DateTime
+  durationType DurationType
+  guests       Int
+
+  // Pricing
+  basePrice  Float
+  serviceFee Float @default(0)
+  totalPrice Float
+
+  // Status
+  status BookingStatus @default(PENDING)
+
+  // Notes
+  tenantNotes String? @db.Text
+  ownerNotes  String? @db.Text
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  review Review?
+
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([checkIn])
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  unitId    String
+  unit      Unit    @relation(fields: [unitId], references: [id])
+  tenantId  String
+  tenant    User    @relation(fields: [tenantId], references: [id])
+
+  rating  Int // 1-5
+  comment String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([tenantId])
+}
