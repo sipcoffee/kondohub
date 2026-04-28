@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
@@ -34,6 +34,15 @@ enum DurationType {
   DAILY
   WEEKLY
   MONTHLY
+}
+
+enum Platform {
+  KONDOHUB
+  AIRBNB
+  FACEBOOK
+  REFERRED
+  DIRECT
+  OTHER
 }
 
 // ==================== AUTH MODELS (better-auth) ====================
@@ -144,6 +153,8 @@ model Unit {
   bookings     Booking[]
   reviews      Review[]
   availability Availability[]
+  salesTargets SalesTarget[]
+  salesEntries SalesEntry[]
 
   @@index([ownerId])
   @@index([city])
@@ -249,4 +260,42 @@ model Review {
 
   @@index([unitId])
   @@index([tenantId])
+}
+
+// ==================== SALES TRACKING ====================
+// Owner-facing monthly target tracker. SalesTarget defines the goal for a
+// unit in a given month; SalesEntry is a single calendar-day row that the
+// owner fills in (one row per day, like the spreadsheet). Kept independent
+// of Booking so off-platform sales (Airbnb, Facebook DMs, referrals) can be
+// logged without forcing a fake Booking record.
+
+model SalesTarget {
+  id              String   @id @default(cuid())
+  unitId          String
+  unit            Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  year            Int
+  month           Int // 1-12
+  dailyTargetRate Float
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([unitId, year, month])
+  @@index([unitId])
+}
+
+model SalesEntry {
+  id        String    @id @default(cuid())
+  unitId    String
+  unit      Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  date      DateTime  @db.Date
+  platform  Platform?
+  bookings  Int       @default(0)
+  revenue   Float     @default(0)
+  remarks   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([unitId, date])
+  @@index([unitId, date])
 }

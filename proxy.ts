@@ -10,22 +10,23 @@ const protectedRoutes: Record<string, string[]> = {
   "/settings": ["TENANT", "OWNER", "ADMIN"],
 };
 
-// Public routes that don't require authentication
-const publicRoutes = [
-  "/",
+// Public routes that don't require authentication.
+// All /api/* paths are excluded — route handlers run their own auth checks
+// and need to return 401, not be redirected to /login.
+const publicPrefixes = [
   "/login",
   "/signup",
   "/units",
   "/about",
   "/contact",
-  "/api/auth",
+  "/api",
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+  // Allow public routes (exact match for "/", prefix match for the rest)
+  if (pathname === "/" || publicPrefixes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
@@ -56,7 +57,7 @@ export async function middleware(request: NextRequest) {
         headers: {
           cookie: request.headers.get("cookie") || "",
         },
-      }
+      },
     );
 
     if (!sessionResponse.ok) {
@@ -81,9 +82,13 @@ export async function middleware(request: NextRequest) {
         if (!allowedRoles.includes(userRole)) {
           // User doesn't have permission, redirect to appropriate dashboard
           if (userRole === "ADMIN") {
-            return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+            return NextResponse.redirect(
+              new URL("/admin/dashboard", request.url),
+            );
           } else if (userRole === "OWNER") {
-            return NextResponse.redirect(new URL("/owner/dashboard", request.url));
+            return NextResponse.redirect(
+              new URL("/owner/dashboard", request.url),
+            );
           } else {
             return NextResponse.redirect(new URL("/dashboard", request.url));
           }

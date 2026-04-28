@@ -6,7 +6,6 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -29,17 +28,11 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { CalendarDays, Building2, User } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { OwnerBookingActions } from "./actions";
 
 export const metadata = {
   title: "Manage Bookings",
-};
-
-const statusColors: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-gray-100 text-gray-800",
-  REJECTED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-blue-100 text-blue-800",
 };
 
 export default async function OwnerBookingsPage() {
@@ -133,26 +126,21 @@ export default async function OwnerBookingsPage() {
         </div>
       </TableCell>
       <TableCell>
-        <Badge className={statusColors[booking.status]}>{booking.status}</Badge>
+        <StatusBadge status={booking.status} />
       </TableCell>
       <TableCell>
         {showActions ? (
           <div className="flex gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href={`/owner/bookings/${booking.id}`}>View</Link>
+              <Link href={`/bookings/${booking.id}`}>View</Link>
             </Button>
             {booking.status === "PENDING" && (
-              <>
-                <Button size="sm">Confirm</Button>
-                <Button size="sm" variant="destructive">
-                  Reject
-                </Button>
-              </>
+              <OwnerBookingActions bookingId={booking.id} />
             )}
           </div>
         ) : (
           <Button size="sm" variant="ghost" asChild>
-            <Link href={`/owner/bookings/${booking.id}`}>View</Link>
+            <Link href={`/bookings/${booking.id}`}>View</Link>
           </Button>
         )}
       </TableCell>

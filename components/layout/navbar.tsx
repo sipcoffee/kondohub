@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,13 +19,17 @@ import {
 } from "@/components/ui/sheet";
 import {
   Building2,
+  Globe,
   Menu,
-  User,
+  Search,
+  Heart,
+  LayoutDashboard,
   Settings,
   LogOut,
-  LayoutDashboard,
   CalendarDays,
+  User,
   Home,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,11 +37,12 @@ export function Navbar() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const user = session?.user;
-  const userRole = (user?.role as string) || "TENANT";
+  const userRole =
+    (user as { role?: string } | undefined)?.role || "TENANT";
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success("Signed out successfully");
+    toast.success("Signed out");
     router.push("/");
     router.refresh();
   };
@@ -55,10 +59,7 @@ export function Navbar() {
   };
 
   const getNavLinks = () => {
-    const baseLinks = [
-      { href: "/units", label: "Browse Units", icon: Home },
-    ];
-
+    const baseLinks = [{ href: "/units", label: "Browse condos", icon: Home }];
     if (!user) return baseLinks;
 
     switch (userRole) {
@@ -67,20 +68,21 @@ export function Navbar() {
           ...baseLinks,
           { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
           { href: "/admin/users", label: "Users", icon: User },
-          { href: "/admin/units", label: "All Units", icon: Building2 },
+          { href: "/admin/units", label: "All units", icon: Building2 },
         ];
       case "OWNER":
         return [
           ...baseLinks,
           { href: "/owner/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/owner/units", label: "My Units", icon: Building2 },
+          { href: "/owner/units", label: "My condos", icon: Building2 },
           { href: "/owner/bookings", label: "Bookings", icon: CalendarDays },
+          { href: "/owner/sales", label: "Sales tracker", icon: TrendingUp },
         ];
       default:
         return [
           ...baseLinks,
           { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/bookings", label: "My Bookings", icon: CalendarDays },
+          { href: "/bookings", label: "My stays", icon: CalendarDays },
         ];
     }
   };
@@ -88,124 +90,197 @@ export function Navbar() {
   const navLinks = getNavLinks();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header
+      className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-[#EBEBEB] text-[#222222]"
+      style={{ fontFamily: "var(--font-geist-sans)" }}
+    >
+      <div className="mx-auto max-w-7xl px-5 md:px-8 flex h-16 md:h-[4.5rem] items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <Building2 className="h-6 w-6" />
-          <span className="font-bold text-xl">KondoHub</span>
+        <Link href="/" className="group flex items-center gap-2 shrink-0">
+          <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#E0484F] to-[#D5256E] text-white shadow-[0_4px_12px_-3px_rgba(224,72,79,0.5)] group-hover:shadow-[0_8px_18px_-3px_rgba(224,72,79,0.6)] transition-shadow">
+            <Building2 className="h-5 w-5" strokeWidth={2.5} />
+          </span>
+          <span
+            className="text-[1.35rem] font-extrabold tracking-[-0.02em] text-[#222222]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            kondo<span className="text-[#E0484F]">hub</span>
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Compact search (condensed) — hidden on narrow viewports */}
+        <div className="hidden lg:flex flex-1 max-w-md mx-auto">
+          <button className="group w-full flex items-center gap-3 bg-white border border-[#E5E7EB] rounded-full pl-5 pr-2 py-2 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.15)] transition-shadow">
+            <span className="text-sm font-semibold text-[#222222]">Anywhere</span>
+            <span className="h-4 w-px bg-[#EBEBEB]" />
+            <span className="text-sm font-semibold text-[#222222]">Any week</span>
+            <span className="h-4 w-px bg-[#EBEBEB]" />
+            <span className="text-sm text-[#717171] flex-1 text-left">Add guests</span>
+            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-r from-[#E0484F] to-[#D5256E] text-white group-hover:scale-105 transition-transform">
+              <Search className="h-3.5 w-3.5" strokeWidth={3} />
+            </span>
+          </button>
+        </div>
 
-        {/* Auth Section */}
-        <div className="flex items-center space-x-4">
+        {/* Right nav */}
+        <div className="flex items-center gap-1 md:gap-2">
+          <Link
+            href="/signup?role=owner"
+            className="hidden md:inline-block text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#F7F7F7] transition-colors"
+          >
+            List your condo
+          </Link>
+
+          <button
+            className="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#F7F7F7] transition-colors"
+            aria-label="Language"
+          >
+            <Globe className="h-4 w-4 text-[#222222]" />
+          </button>
+
           {isPending ? (
-            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+            <div className="h-10 w-[4.5rem] rounded-full bg-[#F7F7F7] animate-pulse" />
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <Avatar className="h-8 w-8">
+                <button className="group inline-flex items-center gap-2 border border-[#E5E7EB] hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.1)] rounded-full pl-3 pr-1.5 py-1.5 transition-shadow">
+                  <Menu className="h-4 w-4 text-[#222222]" />
+                  <Avatar className="h-7 w-7">
                     <AvatarImage src={user.image || undefined} alt={user.name} />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-[#222222] text-white text-xs font-semibold">
                       {user.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                </Button>
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {user.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {userRole.toLowerCase()}
-                    </p>
+              <DropdownMenuContent
+                className="w-64 rounded-2xl p-2 border-[#EBEBEB] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)]"
+                align="end"
+                forceMount
+              >
+                <DropdownMenuLabel className="font-normal px-3 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-11 w-11">
+                      <AvatarImage src={user.image || undefined} alt={user.name} />
+                      <AvatarFallback className="bg-[#FDE8E4] text-[#C13947] font-semibold">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#222222] truncate">{user.name}</p>
+                      <p className="text-xs text-[#717171] truncate">{user.email}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-[#E0484F] font-semibold mt-0.5">
+                        {userRole.toLowerCase()}
+                      </p>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={getDashboardLink()}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
+                {navLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild className="rounded-lg px-3 py-2.5 text-sm cursor-pointer">
+                    <Link href={link.href}>
+                      <link.icon className="mr-2 h-4 w-4 text-[#717171]" />
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="rounded-lg px-3 py-2.5 text-sm cursor-pointer">
+                  <Link href="/wishlist">
+                    <Heart className="mr-2 h-4 w-4 text-[#717171]" />
+                    Wishlist
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="rounded-lg px-3 py-2.5 text-sm cursor-pointer">
                   <Link href="/settings">
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-2 h-4 w-4 text-[#717171]" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="rounded-lg px-3 py-2.5 text-sm cursor-pointer focus:bg-[#FDE8E4] focus:text-[#C13947]"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="hidden md:flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Get Started</Link>
-              </Button>
-            </div>
-          )}
+            <>
+              <Link
+                href="/login"
+                className="hidden md:inline-block text-sm font-semibold text-[#222222] px-4 py-2 rounded-full hover:bg-[#F7F7F7] transition-colors"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="hidden md:inline-flex items-center gap-2 bg-[#222222] text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#E0484F] transition-colors"
+              >
+                Start booking
+              </Link>
 
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <nav className="flex flex-col space-y-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center space-x-2 text-sm font-medium"
-                  >
-                    <link.icon className="h-4 w-4" />
-                    <span>{link.label}</span>
-                  </Link>
-                ))}
-                {!user && (
-                  <>
-                    <hr />
-                    <Link href="/login" className="text-sm font-medium">
-                      Sign In
+              {/* Mobile account pill */}
+              <Sheet>
+                <SheetTrigger className="md:hidden inline-flex items-center gap-2 border border-[#E5E7EB] hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.1)] rounded-full pl-3 pr-1.5 py-1.5 transition-shadow">
+                  <Menu className="h-4 w-4 text-[#222222]" />
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#222222] text-white">
+                    <User className="h-3.5 w-3.5" />
+                  </span>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 bg-white border-l border-[#EBEBEB] p-6">
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[#E0484F] to-[#D5256E] text-white">
+                      <Building2 className="h-5 w-5" strokeWidth={2.5} />
+                    </span>
+                    <span
+                      className="text-xl font-extrabold tracking-[-0.02em]"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      kondo<span className="text-[#E0484F]">hub</span>
+                    </span>
+                  </div>
+
+                  <nav className="mt-8 flex flex-col">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="flex items-center gap-3 py-3 border-b border-[#EBEBEB] text-[#222222] font-medium"
+                      >
+                        <link.icon className="h-4 w-4 text-[#717171]" />
+                        {link.label}
+                      </Link>
+                    ))}
+                    <Link
+                      href="/signup?role=owner"
+                      className="flex items-center gap-3 py-3 border-b border-[#EBEBEB] text-[#222222] font-medium"
+                    >
+                      <Building2 className="h-4 w-4 text-[#717171]" />
+                      List your condo
                     </Link>
-                    <Link href="/signup" className="text-sm font-medium">
-                      Get Started
+                  </nav>
+
+                  <div className="mt-8 flex flex-col gap-3">
+                    <Link
+                      href="/signup"
+                      className="text-center bg-[#222222] text-white py-3 rounded-full text-sm font-semibold"
+                    >
+                      Start booking
                     </Link>
-                  </>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                    <Link
+                      href="/login"
+                      className="text-center border border-[#E5E7EB] py-3 rounded-full text-sm font-semibold text-[#222222]"
+                    >
+                      Sign in
+                    </Link>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          )}
         </div>
       </div>
     </header>

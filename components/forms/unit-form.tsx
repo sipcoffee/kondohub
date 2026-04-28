@@ -278,7 +278,7 @@ export function UnitForm({ initialData, mode }: UnitFormProps) {
               <Select
                 value={formData.bedrooms.toString()}
                 onValueChange={(value) =>
-                  handleChange("bedrooms", parseInt(value))
+                  handleChange("bedrooms", parseInt(value ?? "0"))
                 }
                 disabled={isLoading}
               >
@@ -299,7 +299,7 @@ export function UnitForm({ initialData, mode }: UnitFormProps) {
               <Select
                 value={formData.bathrooms.toString()}
                 onValueChange={(value) =>
-                  handleChange("bathrooms", parseInt(value))
+                  handleChange("bathrooms", parseInt(value ?? "1"))
                 }
                 disabled={isLoading}
               >
@@ -320,7 +320,7 @@ export function UnitForm({ initialData, mode }: UnitFormProps) {
               <Select
                 value={formData.maxGuests.toString()}
                 onValueChange={(value) =>
-                  handleChange("maxGuests", parseInt(value))
+                  handleChange("maxGuests", parseInt(value ?? "1"))
                 }
                 disabled={isLoading}
               >

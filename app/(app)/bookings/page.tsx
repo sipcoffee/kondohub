@@ -6,7 +6,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardContent,
@@ -24,14 +24,6 @@ import { CalendarDays, MapPin, Building2 } from "lucide-react";
 
 export const metadata = {
   title: "My Bookings",
-};
-
-const statusColors: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-gray-100 text-gray-800",
-  REJECTED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-blue-100 text-blue-800",
 };
 
 export default async function BookingsPage() {
@@ -106,9 +98,7 @@ export default async function BookingsPage() {
                   {booking.unit.city}, {booking.unit.province}
                 </p>
               </div>
-              <Badge className={statusColors[booking.status]}>
-                {booking.status}
-              </Badge>
+              <StatusBadge status={booking.status} />
             </div>
             <div className="mt-2 text-sm">
               <p className="flex items-center text-muted-foreground">
