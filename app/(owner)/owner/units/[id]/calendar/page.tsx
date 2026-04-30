@@ -65,23 +65,29 @@ export default async function AvailabilityPage(props: { params: Params }) {
 
   const initiallyBlocked = blockedRecords.map((r) => isoDay(r.date));
   const bookingHolds = activeBookings.flatMap((b) =>
-    enumerateDays(b.checkIn, b.checkOut)
+    enumerateDays(b.checkIn, b.checkOut),
   );
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <Link
           href={`/owner/units/${unit.id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[#717171] hover:text-[#222222] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to unit
         </Link>
-        <div className="mt-3">
-          <h1 className="text-3xl font-bold">{unit.name}</h1>
-          <p className="text-muted-foreground mt-1">
-            Block out dates when your unit isn&apos;t available.
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
+            Availability
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-[#222222] leading-[1.05]">
+            {unit.name}
+          </h1>
+          <p className="mt-3 text-[#717171] max-w-xl">
+            Block out dates the unit isn&apos;t available. Active booking dates
+            are locked automatically.
           </p>
         </div>
       </div>

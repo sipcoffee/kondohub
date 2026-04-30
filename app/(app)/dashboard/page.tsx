@@ -5,9 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import { SectionHeading } from "@/components/dashboard/section-heading";
+import { KpiCard } from "@/components/dashboard/kpi-card";
 import {
   CalendarDays,
   Home,
@@ -15,6 +16,7 @@ import {
   CreditCard,
   Building2,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 export const metadata = { title: "Dashboard" };
@@ -22,6 +24,9 @@ export const metadata = { title: "Dashboard" };
 export default async function TenantDashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/login");
+  const role = (session.user as { role?: string }).role;
+  if (role === "ADMIN") redirect("/admin/dashboard");
+  if (role === "OWNER") redirect("/owner/dashboard");
   const user = session.user;
   const userId = user.id;
 
@@ -50,10 +55,14 @@ export default async function TenantDashboardPage() {
       prisma.booking.findMany({
         where: { tenantId: userId },
         orderBy: { createdAt: "desc" },
-        take: 4,
+        take: 6,
         include: {
           unit: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              city: true,
+              province: true,
               photos: { where: { isPrimary: true }, take: 1 },
             },
           },
@@ -61,20 +70,59 @@ export default async function TenantDashboardPage() {
       }),
     ]);
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Welcome back, {user.name}</h1>
-        <p className="text-muted-foreground mt-1">
-          Here&apos;s what&apos;s happening with your stays.
-        </p>
-      </div>
+  const firstName = user.name?.split(" ")[0] || "there";
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Stat icon={CalendarDays} label="Total bookings" value={allBookings} sub="All time" />
-        <Stat icon={Clock} label="Upcoming" value={upcoming} sub="Pending + confirmed" />
-        <Stat icon={Home} label="Completed" value={completed} sub="Past stays" />
-        <Stat
+  return (
+    <div className="space-y-10">
+      <DashboardHero
+        tone="tenant"
+        eyebrow="Your stays"
+        title={`Welcome back, ${firstName}`}
+        highlight={firstName}
+        subtitle="Your bookings, recent stays, and what's lined up next — all in one place."
+        cta={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/units"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-[#E0484F] to-[#D5256E] text-white px-5 py-3 rounded-full text-sm font-semibold hover:shadow-[0_10px_24px_-6px_rgba(224,72,79,0.55)] transition-shadow"
+            >
+              <Sparkles className="h-4 w-4" strokeWidth={2.5} />
+              Browse condos
+            </Link>
+            <Link
+              href="/bookings"
+              className="inline-flex items-center text-sm font-semibold text-[#222222] px-5 py-3 rounded-full border border-[#E5E7EB] bg-white hover:border-[#222222] transition-colors"
+            >
+              My bookings
+            </Link>
+          </div>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          tone="tenant"
+          icon={CalendarDays}
+          label="Total bookings"
+          value={allBookings}
+          sub="Every stay you've ever booked"
+        />
+        <KpiCard
+          tone="tenant"
+          icon={Clock}
+          label="Upcoming"
+          value={upcoming}
+          sub="Pending + confirmed stays"
+        />
+        <KpiCard
+          tone="tenant"
+          icon={Home}
+          label="Completed"
+          value={completed}
+          sub="Past stays you wrapped up"
+        />
+        <KpiCard
+          tone="tenant"
           icon={CreditCard}
           label="Total spent"
           value={formatCurrency(totalSpentAgg._sum.totalPrice ?? 0)}
@@ -82,114 +130,95 @@ export default async function TenantDashboardPage() {
         />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick actions</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/units">Browse condos</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/bookings">My bookings</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/settings">Account settings</Link>
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent bookings</CardTitle>
-          {recent.length > 0 && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/bookings">
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="On your calendar"
+          title="Your latest trips"
+          description="Most recent bookings, newest first."
+          cta={
+            recent.length > 0 ? (
+              <Link
+                href="/bookings"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#222222] hover:text-[#E0484F] transition-colors"
+              >
                 View all
-                <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {recent.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p>No bookings yet.</p>
-              <p className="text-sm mt-1">
-                Start browsing condos and book your first stay.
-              </p>
-              <Button className="mt-4" asChild>
-                <Link href="/units">Browse condos</Link>
-              </Button>
+            ) : null
+          }
+        />
+
+        {recent.length === 0 ? (
+          <div className="rounded-2xl border border-[#EBEBEB] bg-white p-12 text-center">
+            <div className="h-12 w-12 mx-auto rounded-xl bg-[#FDE8E4] text-[#C13947] flex items-center justify-center mb-4">
+              <CalendarDays className="h-5 w-5" />
             </div>
-          ) : (
-            <ul className="space-y-3">
-              {recent.map((b) => (
-                <li
-                  key={b.id}
-                  className="flex items-center gap-4 rounded-xl border border-[#EBEBEB] p-3 hover:bg-[#FAFAFA] transition-colors"
-                >
-                  <div className="relative h-14 w-14 rounded-md overflow-hidden bg-muted shrink-0">
-                    {b.unit.photos[0] ? (
-                      <Image
-                        src={b.unit.photos[0].url}
-                        alt=""
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Building2 className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{b.unit.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDateShort(b.checkIn)} – {formatDateShort(b.checkOut)}
+            <h3 className="font-display text-xl font-bold text-[#222222]">
+              No bookings yet
+            </h3>
+            <p className="mt-2 text-sm text-[#717171] max-w-sm mx-auto">
+              Find your next condo stay — by the night, week, or month.
+            </p>
+            <Link
+              href="/units"
+              className="inline-flex items-center gap-2 mt-5 bg-gradient-to-r from-[#E0484F] to-[#D5256E] text-white px-5 py-3 rounded-full text-sm font-semibold hover:shadow-[0_10px_24px_-6px_rgba(224,72,79,0.55)] transition-shadow"
+            >
+              <Sparkles className="h-4 w-4" strokeWidth={2.5} />
+              Browse condos
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {recent.map((b) => (
+              <Link
+                key={b.id}
+                href={`/bookings/${b.id}`}
+                className="group block rounded-2xl border border-[#EBEBEB] bg-white overflow-hidden transition-all hover:border-[#222222] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)]"
+              >
+                <div className="relative aspect-[4/3] bg-[#F7F7F7]">
+                  {b.unit.photos[0] ? (
+                    <Image
+                      src={b.unit.photos[0].url}
+                      alt={b.unit.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Building2 className="h-8 w-8 text-[#9CA3AF]" />
+                    </div>
+                  )}
+                  <span className="absolute top-3 right-3">
+                    <StatusBadge status={b.status} />
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-display text-lg font-bold text-[#222222] line-clamp-1">
+                    {b.unit.name}
+                  </h3>
+                  <p className="text-sm text-[#717171] mt-0.5 line-clamp-1">
+                    {b.unit.city}, {b.unit.province}
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-[#EBEBEB] flex items-end justify-between">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-[#717171] font-semibold">
+                        Stay
+                      </p>
+                      <p className="text-sm text-[#222222] mt-0.5">
+                        {formatDateShort(b.checkIn)} –{" "}
+                        {formatDateShort(b.checkOut)}
+                      </p>
+                    </div>
+                    <p className="font-display text-lg font-extrabold text-[#222222] tabular-nums">
+                      {formatCurrency(b.totalPrice)}
                     </p>
                   </div>
-                  <div className="hidden sm:flex flex-col items-end gap-1.5">
-                    <StatusBadge status={b.status} />
-                    <span className="text-sm font-semibold">
-                      {formatCurrency(b.totalPrice)}
-                    </span>
-                  </div>
-                  <Button size="sm" variant="ghost" asChild>
-                    <Link href={`/bookings/${b.id}`}>View</Link>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string | number;
-  sub?: string;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{label}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
-      </CardContent>
-    </Card>
   );
 }

@@ -42,15 +42,24 @@ export default async function ReviewPage(props: { params: Params }) {
         Back to booking
       </Link>
       <div className="mt-4 mb-8">
-        <p className="text-sm text-[#E0484F] font-semibold uppercase tracking-wider">
-          Review
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
+          Review your stay
         </p>
-        <h1
-          className="mt-1 text-3xl md:text-4xl font-extrabold text-[#222222] tracking-[-0.02em]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Tell us how it went.
+        <h1 className="font-display text-3xl md:text-4xl font-extrabold text-[#222222] leading-[1.05]">
+          Tell us how{" "}
+          <span className="relative inline-block">
+            <span className="relative z-10">{booking.unit.name}</span>
+            <span
+              className="absolute left-0 right-0 bottom-1 h-2.5 bg-[#FDD3CB] z-0 rounded-sm"
+              aria-hidden
+            />
+          </span>{" "}
+          went.
         </h1>
+        <p className="mt-3 text-[#717171]">
+          A few honest words from you helps the next guest pick the right
+          place.
+        </p>
       </div>
 
       <ReviewForm bookingId={id} unitName={booking.unit.name} />

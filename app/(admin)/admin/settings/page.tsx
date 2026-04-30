@@ -1,14 +1,7 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import {
   Settings as SettingsIcon,
   Mail,
@@ -25,83 +18,84 @@ export default async function AdminSettingsPage() {
   const role = (session.user as { role?: string }).role;
   if (role !== "ADMIN") redirect("/dashboard");
 
+  const settings = [
+    {
+      icon: SettingsIcon,
+      title: "Service fees",
+      description:
+        "Set the platform service fee taken from each booking. Currently 0%.",
+    },
+    {
+      icon: Mail,
+      title: "Email & notifications",
+      description:
+        "Connect a transactional email provider (Resend, SES) to power booking and review notifications.",
+    },
+    {
+      icon: Shield,
+      title: "Identity verification",
+      description:
+        "Require government ID upload for owners before going active.",
+    },
+    {
+      icon: Database,
+      title: "Data export",
+      description:
+        "Download CSVs of users, units, and bookings for compliance and reporting.",
+    },
+  ];
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Platform settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Configure how the platform behaves.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <DashboardHero
+        tone="admin"
+        eyebrow="Platform configuration"
+        title="Settings"
+        highlight="Settings"
+        subtitle="Configure how the platform behaves. Each card maps to a capability we'll wire up as the product matures."
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <SettingCard
-          icon={SettingsIcon}
-          title="Service fees"
-          description="Set the platform service fee taken from each booking. Currently 0%."
-        />
-        <SettingCard
-          icon={Mail}
-          title="Email & notifications"
-          description="Connect a transactional email provider (Resend, SES) to power booking and review notifications."
-        />
-        <SettingCard
-          icon={Shield}
-          title="Identity verification"
-          description="Require government ID upload for owners before going active."
-        />
-        <SettingCard
-          icon={Database}
-          title="Data export"
-          description="Download CSVs of users, units, and bookings for compliance and reporting."
-        />
+        {settings.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div
+              key={s.title}
+              className="rounded-2xl border border-[#EBEBEB] bg-white p-6 transition-all hover:border-[#222222] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)]"
+            >
+              <div className="h-10 w-10 rounded-xl bg-[#222222] text-white flex items-center justify-center mb-4">
+                <Icon className="h-4 w-4" />
+              </div>
+              <h2 className="font-display text-lg font-extrabold text-[#222222]">
+                {s.title}
+              </h2>
+              <p className="mt-1.5 text-sm text-[#717171] leading-relaxed">
+                {s.description}
+              </p>
+              <span className="inline-flex items-center gap-1.5 mt-4 text-[10px] uppercase tracking-[0.14em] text-[#9CA3AF] font-bold">
+                Coming soon
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Heads-up</CardTitle>
-          <CardDescription>
-            None of these settings are wired yet — they&apos;re placeholders for the
-            next milestone. Each card maps to a capability we&apos;ll bolt on once
-            the core flow is stable.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground flex items-center gap-2">
-          <ExternalLink className="h-4 w-4" />
-          See PLAN.md for the roadmap.
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function SettingCard({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-[#FDE8E4] text-[#C13947] flex items-center justify-center">
-            <Icon className="h-4 w-4" />
+      <section className="rounded-2xl border border-[#EBEBEB] bg-[#FAFAFA] p-6 md:p-7">
+        <div className="flex gap-4">
+          <div className="h-10 w-10 shrink-0 rounded-xl bg-white border border-[#EBEBEB] text-[#222222] flex items-center justify-center">
+            <ExternalLink className="h-4 w-4" />
           </div>
-          <CardTitle className="text-base">{title}</CardTitle>
+          <div>
+            <h2 className="font-display text-lg md:text-xl font-extrabold text-[#222222]">
+              Heads-up
+            </h2>
+            <p className="mt-1.5 text-sm text-[#717171] leading-relaxed">
+              None of these settings are wired yet — they&apos;re placeholders
+              for the next milestone. See PLAN.md for the roadmap.
+            </p>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {description}
-        </p>
-        <Button size="sm" variant="outline" disabled>
-          Coming soon
-        </Button>
-      </CardContent>
-    </Card>
+      </section>
+    </div>
   );
 }

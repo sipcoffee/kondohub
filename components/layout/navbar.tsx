@@ -21,15 +21,11 @@ import {
   Building2,
   Globe,
   Menu,
-  Search,
   Heart,
-  LayoutDashboard,
   Settings,
   LogOut,
-  CalendarDays,
   User,
   Home,
-  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,44 +43,14 @@ export function Navbar() {
     router.refresh();
   };
 
-  const getDashboardLink = () => {
-    switch (userRole) {
-      case "ADMIN":
-        return "/admin/dashboard";
-      case "OWNER":
-        return "/owner/dashboard";
-      default:
-        return "/dashboard";
-    }
-  };
-
   const getNavLinks = () => {
     const baseLinks = [{ href: "/units", label: "Browse condos", icon: Home }];
     if (!user) return baseLinks;
 
-    switch (userRole) {
-      case "ADMIN":
-        return [
-          ...baseLinks,
-          { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/admin/users", label: "Users", icon: User },
-          { href: "/admin/units", label: "All units", icon: Building2 },
-        ];
-      case "OWNER":
-        return [
-          ...baseLinks,
-          { href: "/owner/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/owner/units", label: "My condos", icon: Building2 },
-          { href: "/owner/bookings", label: "Bookings", icon: CalendarDays },
-          { href: "/owner/sales", label: "Sales tracker", icon: TrendingUp },
-        ];
-      default:
-        return [
-          ...baseLinks,
-          { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/bookings", label: "My stays", icon: CalendarDays },
-        ];
-    }
+    // Page-level navigation now lives in role-specific sub-navs above the
+    // page (AdminSubNav / OwnerSubNav / TenantSubNav). Keep the avatar
+    // dropdown focused on profile/account actions only.
+    return baseLinks;
   };
 
   const navLinks = getNavLinks();
@@ -107,20 +73,6 @@ export function Navbar() {
             kondo<span className="text-[#E0484F]">hub</span>
           </span>
         </Link>
-
-        {/* Compact search (condensed) — hidden on narrow viewports */}
-        <div className="hidden lg:flex flex-1 max-w-md mx-auto">
-          <button className="group w-full flex items-center gap-3 bg-white border border-[#E5E7EB] rounded-full pl-5 pr-2 py-2 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.15)] transition-shadow">
-            <span className="text-sm font-semibold text-[#222222]">Anywhere</span>
-            <span className="h-4 w-px bg-[#EBEBEB]" />
-            <span className="text-sm font-semibold text-[#222222]">Any week</span>
-            <span className="h-4 w-px bg-[#EBEBEB]" />
-            <span className="text-sm text-[#717171] flex-1 text-left">Add guests</span>
-            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-r from-[#E0484F] to-[#D5256E] text-white group-hover:scale-105 transition-transform">
-              <Search className="h-3.5 w-3.5" strokeWidth={3} />
-            </span>
-          </button>
-        </div>
 
         {/* Right nav */}
         <div className="flex items-center gap-1 md:gap-2">

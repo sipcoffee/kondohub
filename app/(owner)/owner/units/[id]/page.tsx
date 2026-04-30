@@ -10,6 +10,13 @@ type Params = Promise<{ id: string }>;
 
 export const metadata = { title: "Edit unit" };
 
+const STATUS_PILL: Record<string, string> = {
+  DRAFT: "bg-[#F7F7F7] text-[#717171] border border-[#EBEBEB]",
+  ACTIVE: "bg-[#DFF0EE] text-[#1F5E58] border border-transparent",
+  INACTIVE: "bg-[#FFF4D6] text-[#7A5A00] border border-transparent",
+  UNDER_MAINTENANCE: "bg-[#FDE8E4] text-[#C13947] border border-transparent",
+};
+
 export default async function EditUnitPage(props: { params: Params }) {
   const { id } = await props.params;
   const session = await auth.api.getSession({ headers: await headers() });
@@ -22,55 +29,73 @@ export default async function EditUnitPage(props: { params: Params }) {
   if (unit.ownerId !== session.user.id && userRole !== "ADMIN") notFound();
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <Link
           href="/owner/units"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[#717171] hover:text-[#222222] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          My units
+          Back to my condos
         </Link>
-        <div className="mt-3">
-          <h1 className="text-3xl font-bold">Edit unit</h1>
-          <p className="text-muted-foreground mt-1">
-            Update details, pricing and status
-          </p>
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
+              Edit listing
+            </p>
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-[#222222] leading-[1.05]">
+              {unit.name}
+            </h1>
+            <p className="mt-2 text-sm text-[#717171]">
+              {unit.city}, {unit.province}
+            </p>
+          </div>
+          <span
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${STATUS_PILL[unit.status] ?? STATUS_PILL.DRAFT}`}
+          >
+            {unit.status.replace("_", " ").toLowerCase()}
+          </span>
         </div>
       </div>
 
-      {/* Quick links to nested editors */}
+      {/* Quick links */}
       <div className="grid sm:grid-cols-3 gap-3">
         <Link
           href={`/owner/units/${unit.id}/photos`}
-          className="group rounded-xl border border-[#EBEBEB] bg-white p-4 hover:border-[#222222] hover:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.12)] transition-all"
+          className="group rounded-2xl border border-[#EBEBEB] bg-white p-5 transition-all hover:border-[#222222] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)]"
         >
-          <div className="h-9 w-9 rounded-lg bg-[#FDE8E4] text-[#C13947] flex items-center justify-center mb-3">
+          <div className="h-10 w-10 rounded-xl bg-[#FDE8E4] text-[#C13947] flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
             <ImagePlus className="h-4 w-4" />
           </div>
-          <p className="font-semibold text-sm">Photos</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Manage gallery</p>
+          <p className="font-display text-base font-bold text-[#222222]">
+            Photos
+          </p>
+          <p className="text-xs text-[#717171] mt-0.5">Manage the gallery</p>
         </Link>
         <Link
           href={`/owner/units/${unit.id}/calendar`}
-          className="group rounded-xl border border-[#EBEBEB] bg-white p-4 hover:border-[#222222] hover:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.12)] transition-all"
+          className="group rounded-2xl border border-[#EBEBEB] bg-white p-5 transition-all hover:border-[#222222] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)]"
         >
-          <div className="h-9 w-9 rounded-lg bg-[#E6F7EC] text-[#1F6E3A] flex items-center justify-center mb-3">
+          <div className="h-10 w-10 rounded-xl bg-[#DFF0EE] text-[#1F5E58] flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
             <CalendarRange className="h-4 w-4" />
           </div>
-          <p className="font-semibold text-sm">Availability</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Block dates</p>
+          <p className="font-display text-base font-bold text-[#222222]">
+            Availability
+          </p>
+          <p className="text-xs text-[#717171] mt-0.5">Block out dates</p>
         </Link>
         {unit.status === "ACTIVE" && (
           <Link
             href={`/units/${unit.slug}`}
-            className="group rounded-xl border border-[#EBEBEB] bg-white p-4 hover:border-[#222222] hover:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.12)] transition-all"
+            className="group rounded-2xl border border-[#EBEBEB] bg-white p-5 transition-all hover:border-[#222222] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.12)]"
           >
-            <div className="h-9 w-9 rounded-lg bg-[#E6EFFB] text-[#234B8A] flex items-center justify-center mb-3">
+            <div className="h-10 w-10 rounded-xl bg-[#E4EEF5] text-[#2C4A6B] flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
               <Eye className="h-4 w-4" />
             </div>
-            <p className="font-semibold text-sm">Public page</p>
-            <p className="text-xs text-muted-foreground mt-0.5">View as guest</p>
+            <p className="font-display text-base font-bold text-[#222222]">
+              Public page
+            </p>
+            <p className="text-xs text-[#717171] mt-0.5">View as a guest</p>
           </Link>
         )}
       </div>

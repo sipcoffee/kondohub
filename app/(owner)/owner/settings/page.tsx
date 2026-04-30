@@ -2,14 +2,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ProfileForm } from "@/components/forms/profile-form";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { Wallet, Bell, ShieldCheck } from "lucide-react";
 
 export const metadata = { title: "Owner settings" };
@@ -34,42 +28,60 @@ export default async function OwnerSettingsPage() {
   if (!user) redirect("/login");
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Owner settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Profile, payouts, and host preferences.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <DashboardHero
+        tone="owner"
+        eyebrow="Host settings"
+        title="Owner account"
+        highlight="account"
+        subtitle="Profile, payouts, notifications, and verification — everything that powers your hosting."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>
-            What guests see on your listings and bookings.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="max-w-3xl space-y-6">
+        <section className="rounded-2xl border border-[#EBEBEB] bg-white p-6 md:p-7 space-y-5">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-1.5">
+              Public profile
+            </p>
+            <h2 className="font-display text-xl md:text-2xl font-extrabold text-[#222222]">
+              How guests see you
+            </h2>
+            <p className="mt-1 text-sm text-[#717171]">
+              This appears on your listings and on every booking confirmation.
+            </p>
+          </div>
           <ProfileForm user={user} />
-        </CardContent>
-      </Card>
+        </section>
 
-      <div className="grid sm:grid-cols-3 gap-3">
-        <PlaceholderTile
-          icon={Wallet}
-          title="Payouts"
-          body="Add bank account or e-wallet for monthly payouts."
-        />
-        <PlaceholderTile
-          icon={Bell}
-          title="Notifications"
-          body="Booking alerts via email and SMS."
-        />
-        <PlaceholderTile
-          icon={ShieldCheck}
-          title="Verification"
-          body="Upload IDs to earn the verified host badge."
-        />
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-1.5">
+            Coming soon
+          </p>
+          <h2 className="font-display text-xl md:text-2xl font-extrabold text-[#222222]">
+            Host capabilities
+          </h2>
+          <p className="mt-1 text-sm text-[#717171]">
+            We&apos;re rolling these out as the platform grows.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-3">
+          <PlaceholderTile
+            icon={Wallet}
+            title="Payouts"
+            body="Add a bank account or e-wallet for monthly payouts."
+          />
+          <PlaceholderTile
+            icon={Bell}
+            title="Notifications"
+            body="Email, SMS, and push alerts for new bookings."
+          />
+          <PlaceholderTile
+            icon={ShieldCheck}
+            title="Verification"
+            body="Upload IDs to earn the verified host badge."
+          />
+        </div>
       </div>
     </div>
   );
@@ -86,12 +98,12 @@ function PlaceholderTile({
 }) {
   return (
     <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] p-5">
-      <div className="h-9 w-9 rounded-lg bg-white border border-[#EBEBEB] flex items-center justify-center mb-3">
-        <Icon className="h-4 w-4 text-[#717171]" />
+      <div className="h-9 w-9 rounded-xl bg-white border border-[#EBEBEB] text-[#717171] flex items-center justify-center mb-3">
+        <Icon className="h-4 w-4" />
       </div>
-      <p className="font-semibold text-sm">{title}</p>
-      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{body}</p>
-      <p className="mt-3 text-[10px] uppercase tracking-wider text-[#9CA3AF] font-semibold">
+      <p className="font-display text-base font-bold text-[#222222]">{title}</p>
+      <p className="text-xs text-[#717171] mt-1 leading-relaxed">{body}</p>
+      <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[#9CA3AF] font-bold">
         Coming soon
       </p>
     </div>

@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/navbar";
+import { TenantSubNav } from "@/components/layout/tenant-subnav";
 
 export default function AppLayout({
   children,
@@ -8,7 +9,10 @@ export default function AppLayout({
   return (
     <>
       <Navbar />
-      <main className="flex-1 container py-8">{children}</main>
+      <TenantSubNav />
+      <main className="flex-1 mx-auto w-full max-w-7xl px-5 md:px-8 py-8 md:py-10">
+        {children}
+      </main>
     </>
   );
 }

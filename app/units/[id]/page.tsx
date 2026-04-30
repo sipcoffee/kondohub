@@ -85,13 +85,13 @@ export default async function UnitDetailPage(props: { params: Params }) {
     <div className="mx-auto max-w-7xl px-5 md:px-8 py-8 md:py-10">
       {/* Header */}
       <div className="mb-6">
-        <h1
-          className="text-3xl md:text-4xl font-extrabold text-[#222222] tracking-[-0.02em]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
+          {unit.city}, {unit.province}
+        </p>
+        <h1 className="font-display text-3xl md:text-5xl font-extrabold text-[#222222] leading-[1.05]">
           {unit.name}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#717171]">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#717171]">
           {avgRating._avg.rating !== null && (
             <span className="inline-flex items-center gap-1 text-[#222222]">
               <Star className="h-3.5 w-3.5 fill-[#222222]" />
@@ -206,10 +206,7 @@ export default async function UnitDetailPage(props: { params: Params }) {
 
           {/* Description */}
           <section className="pb-8 border-b border-[#EBEBEB]">
-            <h2
-              className="text-2xl font-extrabold text-[#222222] tracking-[-0.02em] mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+            <h2 className="font-display text-2xl md:text-3xl font-extrabold text-[#222222] mb-4">
               About this place
             </h2>
             <p className="text-[#222222] leading-relaxed whitespace-pre-line">
@@ -220,10 +217,7 @@ export default async function UnitDetailPage(props: { params: Params }) {
           {/* Amenities */}
           {unit.amenities.length > 0 && (
             <section className="pb-8 border-b border-[#EBEBEB]">
-              <h2
-                className="text-2xl font-extrabold text-[#222222] tracking-[-0.02em] mb-5"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              <h2 className="font-display text-2xl md:text-3xl font-extrabold text-[#222222] mb-5">
                 What this place offers
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -243,10 +237,7 @@ export default async function UnitDetailPage(props: { params: Params }) {
           {/* Reviews */}
           <section>
             <div className="flex items-baseline justify-between flex-wrap gap-3 mb-6">
-              <h2
-                className="text-2xl font-extrabold text-[#222222] tracking-[-0.02em]"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              <h2 className="font-display text-2xl md:text-3xl font-extrabold text-[#222222]">
                 Reviews
                 {avgRating._avg.rating !== null && (
                   <span className="ml-3 inline-flex items-center gap-1 text-base font-medium text-[#222222]">

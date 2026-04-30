@@ -72,23 +72,20 @@ export default async function BookingDetailPage(props: { params: Params }) {
           <ArrowLeft className="h-4 w-4" />
           {isOwner ? "All bookings" : "My stays"}
         </Link>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] text-[#717171] uppercase tracking-wider">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
               Booking ref · {booking.id.slice(0, 8).toUpperCase()}
             </p>
-            <h1
-              className="mt-1 text-3xl md:text-4xl font-extrabold text-[#222222] tracking-[-0.02em]"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-[#222222] leading-[1.05]">
               {booking.unit.name}
             </h1>
-            <p className="mt-1 text-sm text-[#717171] flex items-center gap-1.5">
+            <p className="mt-2 text-sm text-[#717171] inline-flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
               {booking.unit.city}, {booking.unit.province}
             </p>
           </div>
-          <StatusBadge status={booking.status} className="text-xs" />
+          <StatusBadge status={booking.status} />
         </div>
       </div>
 

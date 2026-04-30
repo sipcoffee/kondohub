@@ -3,13 +3,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import { SectionHeading } from "@/components/dashboard/section-heading";
+import { KpiCard } from "@/components/dashboard/kpi-card";
 import {
   Building2,
   CalendarDays,
@@ -83,36 +79,42 @@ export default async function AdminAnalyticsPage() {
   const totalRevenue = revenue._sum.totalPrice ?? 0;
   const monthRev = monthRevenue._sum.totalPrice ?? 0;
   const maxCity = Math.max(...topCities.map((c) => c._count._all), 1);
+  const totalFunnel = totals.pending + totals.confirmed + totals.completed || 1;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Analytics</h1>
-        <p className="text-muted-foreground mt-1">
-          Platform health at a glance.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <DashboardHero
+        tone="admin"
+        eyebrow="Platform pulse"
+        title="Analytics"
+        highlight="Analytics"
+        subtitle="Health of the platform — users, inventory, bookings, and revenue at a glance."
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KPI
+        <KpiCard
+          tone="admin"
           icon={Users}
           label="Total users"
           value={totalUsers.toLocaleString()}
           sub={`${totals.owners} owners · ${totals.tenants} tenants`}
         />
-        <KPI
+        <KpiCard
+          tone="admin"
           icon={Building2}
           label="Active units"
           value={totals.activeUnits.toLocaleString()}
           sub={`of ${totals.totalUnits.toLocaleString()} total`}
         />
-        <KPI
+        <KpiCard
+          tone="admin"
           icon={CalendarDays}
           label="Bookings (30d)"
           value={last30Bookings.toLocaleString()}
           sub={`${totals.pending} pending · ${totals.confirmed} confirmed`}
         />
-        <KPI
+        <KpiCard
+          tone="admin"
           icon={TrendingUp}
           label="Revenue (MTD)"
           value={formatCurrency(monthRev)}
@@ -121,86 +123,92 @@ export default async function AdminAnalyticsPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Top cities by inventory</CardTitle>
-            <CardDescription>Where the units are.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <section className="lg:col-span-2 space-y-5">
+          <SectionHeading
+            eyebrow="Inventory map"
+            title="Top cities by inventory"
+            description="Where the units are concentrated."
+          />
+          <div className="rounded-2xl border border-[#EBEBEB] bg-white p-6">
             {topCities.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">
+              <p className="text-[#717171] py-8 text-center text-sm">
                 No units yet.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {topCities.map((c) => (
                   <div key={c.city} className="space-y-1.5">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="inline-flex items-center gap-1.5 font-medium">
-                        <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="inline-flex items-center gap-1.5 font-medium text-[#222222]">
+                        <MapPin className="h-3.5 w-3.5 text-[#717171]" />
                         {c.city}
                       </span>
-                      <span className="text-muted-foreground">
-                        {c._count._all} {c._count._all === 1 ? "unit" : "units"}
+                      <span className="text-[#717171] tabular-nums">
+                        {c._count._all}{" "}
+                        {c._count._all === 1 ? "unit" : "units"}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-[#F4F4F4] rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#F4F4F4] rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-[#E0484F] to-[#D5256E] rounded-full"
-                        style={{ width: `${(c._count._all / maxCity) * 100}%` }}
+                        style={{
+                          width: `${(c._count._all / maxCity) * 100}%`,
+                        }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Booking funnel</CardTitle>
-            <CardDescription>Status distribution.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <FunnelRow label="Pending" value={totals.pending} />
-            <FunnelRow label="Confirmed" value={totals.confirmed} />
-            <FunnelRow label="Completed" value={totals.completed} />
-          </CardContent>
-        </Card>
+        <section className="space-y-5">
+          <SectionHeading
+            eyebrow="Booking funnel"
+            title="Status breakdown"
+            description="Across all bookings."
+          />
+          <div className="rounded-2xl border border-[#EBEBEB] bg-white p-6 space-y-4">
+            {[
+              {
+                label: "Pending",
+                value: totals.pending,
+                color: "bg-[#FDE8E4]",
+              },
+              {
+                label: "Confirmed",
+                value: totals.confirmed,
+                color: "bg-[#DFF0EE]",
+              },
+              {
+                label: "Completed",
+                value: totals.completed,
+                color: "bg-[#222222]",
+              },
+            ].map((row) => (
+              <div key={row.label} className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-[#222222]">
+                    {row.label}
+                  </span>
+                  <span className="font-display font-extrabold tabular-nums text-[#222222]">
+                    {row.value.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-2 bg-[#F4F4F4] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${row.color}`}
+                    style={{
+                      width: `${(row.value / totalFunnel) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
-    </div>
-  );
-}
-
-function KPI({
-  icon: Icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  sub?: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-[#EBEBEB] bg-white p-5">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <p className="text-3xl font-bold mt-2">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-function FunnelRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold">{value.toLocaleString()}</span>
     </div>
   );
 }
