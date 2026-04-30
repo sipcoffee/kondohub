@@ -908,7 +908,7 @@ export default function HomePage() {
                   <svg
                     viewBox="0 0 400 400"
                     className="absolute inset-0 w-full h-full"
-                    preserveAspectRatio="xMidYEnd slice"
+                    preserveAspectRatio="xMidYMax slice"
                     aria-hidden
                   >
                     <g fill="rgba(0,0,0,0.25)">

@@ -4,7 +4,9 @@ import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  // No baseURL → defaults to same origin (window.location.origin in the
+  // browser). Avoids env-driven URL drift between localhost / Vercel previews
+  // / production.
   plugins: [
     inferAdditionalFields({
       user: {
