@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signUp } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -37,22 +38,16 @@ export function SignupForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          role: formData.role,
-          phone: formData.phone || undefined,
-        }),
+      const result = await signUp.email({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        role: formData.role,
+        phone: formData.phone || undefined,
       });
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        toast.error(result.error || "Failed to create account");
+      if (result.error) {
+        toast.error(result.error.message || "Failed to create account");
         return;
       }
 
