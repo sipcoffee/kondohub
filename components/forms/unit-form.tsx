@@ -301,7 +301,7 @@ export function UnitForm({ initialData, mode }: UnitFormProps) {
         title="The unit itself"
         description="Capacity, layout, and physical details."
       >
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <FieldLabel htmlFor="bedrooms">Bedrooms</FieldLabel>
             <Select

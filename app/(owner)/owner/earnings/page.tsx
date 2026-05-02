@@ -145,30 +145,32 @@ export default async function OwnerEarningsPage() {
           title="Monthly revenue"
           description="Booked revenue per month, last 12 months."
         />
-        <div className="rounded-2xl border border-[#EBEBEB] bg-white p-6 md:p-8">
-          <div className="grid grid-cols-12 gap-2 items-end h-56">
-            {months.map((m) => (
-              <div
-                key={m.key}
-                className="flex flex-col items-center justify-end gap-2"
-              >
-                <div className="text-[10px] font-semibold text-[#222222] tabular-nums leading-none h-3">
-                  {m.total > 0
-                    ? formatCurrency(m.total).replace(".00", "")
-                    : ""}
-                </div>
+        <div className="rounded-2xl border border-[#EBEBEB] bg-white p-4 sm:p-6 md:p-8">
+          <div className="overflow-x-auto no-scrollbar -mx-2 px-2">
+            <div className="grid grid-cols-12 gap-2 items-end h-56 min-w-[560px]">
+              {months.map((m) => (
                 <div
-                  className="w-full rounded-t-md bg-gradient-to-t from-[#E0484F] to-[#D5256E]"
-                  style={{
-                    height: `${m.total === 0 ? 4 : Math.max(8, (m.total / maxMonth) * 160)}px`,
-                    opacity: m.total === 0 ? 0.15 : 1,
-                  }}
-                />
-                <span className="text-[10px] text-[#717171] uppercase tracking-wider font-semibold">
-                  {m.label}
-                </span>
-              </div>
-            ))}
+                  key={m.key}
+                  className="flex flex-col items-center justify-end gap-2"
+                >
+                  <div className="text-[10px] font-semibold text-[#222222] tabular-nums leading-none h-3">
+                    {m.total > 0
+                      ? formatCurrency(m.total).replace(".00", "")
+                      : ""}
+                  </div>
+                  <div
+                    className="w-full rounded-t-md bg-gradient-to-t from-[#E0484F] to-[#D5256E]"
+                    style={{
+                      height: `${m.total === 0 ? 4 : Math.max(8, (m.total / maxMonth) * 160)}px`,
+                      opacity: m.total === 0 ? 0.15 : 1,
+                    }}
+                  />
+                  <span className="text-[10px] text-[#717171] uppercase tracking-wider font-semibold">
+                    {m.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

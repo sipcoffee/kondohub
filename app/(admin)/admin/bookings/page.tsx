@@ -94,9 +94,12 @@ export default async function AdminBookingsPage() {
             {bookings.map((b) => (
               <li
                 key={b.id}
-                className="grid grid-cols-1 md:grid-cols-[100px_1.4fr_1.2fr_1fr_140px_120px_60px] gap-4 px-5 py-4 border-b border-[#EBEBEB] last:border-b-0 hover:bg-[#FAFAFA] transition-colors items-center"
+                className="grid grid-cols-1 md:grid-cols-[100px_1.4fr_1.2fr_1fr_140px_120px_60px] gap-2 md:gap-4 px-5 py-4 border-b border-[#EBEBEB] last:border-b-0 hover:bg-[#FAFAFA] transition-colors md:items-center"
               >
                 <span className="font-mono text-xs text-[#717171] truncate">
+                  <span className="md:hidden text-[10px] uppercase tracking-wider font-semibold mr-2 text-[#717171]">
+                    Ref
+                  </span>
                   {b.id.slice(0, 8).toUpperCase()}
                 </span>
 
@@ -126,17 +129,28 @@ export default async function AdminBookingsPage() {
                 </div>
 
                 <div className="text-sm">
-                  <p className="text-[#222222]">{formatDateShort(b.checkIn)}</p>
-                  <p className="text-xs text-[#717171]">
+                  <p className="text-[#222222]">
+                    <span className="md:hidden text-[10px] uppercase tracking-wider text-[#717171] font-semibold mr-2">
+                      Stay
+                    </span>
+                    {formatDateShort(b.checkIn)}
+                    <span className="md:hidden text-[#717171]">
+                      {" "}→ {formatDateShort(b.checkOut)}
+                    </span>
+                  </p>
+                  <p className="hidden md:block text-xs text-[#717171]">
                     → {formatDateShort(b.checkOut)}
                   </p>
                 </div>
 
-                <div>
+                <div className="flex items-center gap-2 md:block">
                   <StatusBadge status={b.status} />
                 </div>
 
                 <p className="md:text-right font-display text-sm font-extrabold text-[#222222] tabular-nums">
+                  <span className="md:hidden text-[10px] uppercase tracking-wider text-[#717171] font-semibold mr-2 font-sans">
+                    Total
+                  </span>
                   {formatCurrency(b.totalPrice)}
                 </p>
 

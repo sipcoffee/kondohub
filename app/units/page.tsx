@@ -210,7 +210,7 @@ export default async function UnitsPage(props: {
       <section className="mx-auto max-w-7xl px-5 md:px-8 py-10 md:py-14">
         {unitsWithRatings.length > 0 ? (
           <>
-            <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E0484F] mb-2">
                   {activeCity ? activeCity : "Available now"}
@@ -222,7 +222,7 @@ export default async function UnitsPage(props: {
                 </h2>
               </div>
               <Select defaultValue="recent">
-                <SelectTrigger className="w-auto h-10 rounded-full border-[#E5E7EB] bg-white px-4 hover:border-[#222222] transition-colors gap-2">
+                <SelectTrigger className="w-full sm:w-auto h-10 rounded-full border-[#E5E7EB] bg-white px-4 hover:border-[#222222] transition-colors gap-2">
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   <SelectValue />
                 </SelectTrigger>

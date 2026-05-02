@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DateRange } from "react-day-picker";
 import { format, differenceInCalendarDays } from "date-fns";
@@ -61,6 +61,15 @@ export function BookingForm({
   const [notes, setNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [calendarMonths, setCalendarMonths] = useState(2);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const sync = () => setCalendarMonths(mq.matches ? 2 : 1);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const availableDurations: DurationType[] = useMemo(() => {
     const out: DurationType[] = [];
@@ -196,10 +205,13 @@ export function BookingForm({
               </span>
               <CalendarDays className="h-4 w-4 text-[#717171] shrink-0" />
             </PopoverTrigger>
-            <PopoverContent className="p-0 w-auto rounded-2xl border-[#EBEBEB]" align="end">
+            <PopoverContent
+              className="p-0 w-auto max-w-[calc(100vw-2rem)] rounded-2xl border-[#EBEBEB]"
+              align="end"
+            >
               <Calendar
                 mode="range"
-                numberOfMonths={2}
+                numberOfMonths={calendarMonths}
                 selected={range}
                 onSelect={setRange}
                 disabled={[

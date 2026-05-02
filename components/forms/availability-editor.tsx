@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
@@ -26,6 +26,15 @@ export function AvailabilityEditor({
     () => new Set(initiallyBlocked)
   );
   const [saving, setSaving] = useState(false);
+  const [calendarMonths, setCalendarMonths] = useState(2);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setCalendarMonths(mq.matches ? 2 : 1);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const initial = useMemo(() => new Set(initiallyBlocked), [initiallyBlocked]);
   const holds = useMemo(() => new Set(bookingHolds), [bookingHolds]);
@@ -91,7 +100,7 @@ export function AvailabilityEditor({
       <div className="rounded-2xl border border-[#EBEBEB] bg-white p-4 sm:p-6">
         <Calendar
           mode="multiple"
-          numberOfMonths={2}
+          numberOfMonths={calendarMonths}
           selected={selectedDates}
           onSelect={onSelect}
           disabled={[

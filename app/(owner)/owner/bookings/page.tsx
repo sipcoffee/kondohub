@@ -175,7 +175,7 @@ export default async function OwnerBookingsPage() {
       />
 
       <Tabs defaultValue="pending">
-        <TabsList className="bg-[#F7F7F7] rounded-full p-1 h-auto">
+        <TabsList className="bg-[#F7F7F7] rounded-full p-1 h-auto max-w-full overflow-x-auto no-scrollbar">
           <TabsTrigger
             value="pending"
             className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-[#222222] data-[state=active]:shadow-sm"

@@ -47,8 +47,11 @@ export function PlatformDonut({ slices }: Props) {
   });
 
   return (
-    <div className="flex items-center gap-6">
-      <svg viewBox="0 0 180 180" className="h-[180px] w-[180px] shrink-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+      <svg
+        viewBox="0 0 180 180"
+        className="h-[160px] w-[160px] sm:h-[180px] sm:w-[180px] shrink-0 mx-auto sm:mx-0"
+      >
         {arcs.map(({ d, slice, i }) => (
           <path
             key={i}
